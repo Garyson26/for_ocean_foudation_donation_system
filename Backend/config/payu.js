@@ -1,8 +1,8 @@
 // PayU Money Configuration
 module.exports = {
   // Test credentials - Replace with production credentials
-  MERCHANT_KEY: process.env.PAYU_MERCHANT_KEY || 'WpQBfa',
-  MERCHANT_SALT: process.env.PAYU_MERCHANT_SALT || 'a6l6MCqPwMZCxSmx6rvrKWp11rJB2y7k',
+  MERCHANT_KEY: process.env.PAYU_MERCHANT_KEY,
+  MERCHANT_SALT: process.env.PAYU_MERCHANT_SALT,
 
   // PayU URLs
   PAYU_BASE_URL: process.env.PAYU_BASE_URL || 'https://test.payu.in', // Test environment
