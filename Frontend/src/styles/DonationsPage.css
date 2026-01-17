@@ -1,0 +1,61 @@
+/* DonationsPage styles */
+.donations-container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.donations-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  text-align: center;
+}
+
+.donations-list {
+  margin-top: 1.5rem;
+}
+
+.donation-card {
+  border: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.donation-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+}
+
+.donation-status {
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f7fafc;
+}
+
+.donation-card strong {
+  font-size: 1.1em;
+  color: #2d3748;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .donations-container {
+    padding: 1rem;
+  }
+
+  .donations-title {
+    font-size: 1.5rem;
+  }
+
+  .donation-card {
+    padding: 1rem;
+  }
+}

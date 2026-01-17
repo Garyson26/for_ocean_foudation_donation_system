@@ -1,0 +1,150 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-3);
+}
+
+.loading-spinner {
+  position: relative;
+  display: inline-block;
+}
+
+.loading-spinner-circle {
+  border: 3px solid transparent;
+  border-top: 3px solid currentColor;
+  border-radius: var(--radius-full);
+  animation: spin 1s linear infinite;
+}
+
+/* Sizes */
+.loading-spinner-sm .loading-spinner-circle {
+  width: 20px;
+  height: 20px;
+}
+
+.loading-spinner-md .loading-spinner-circle {
+  width: 32px;
+  height: 32px;
+}
+
+.loading-spinner-lg .loading-spinner-circle {
+  width: 48px;
+  height: 48px;
+}
+
+.loading-spinner-xl .loading-spinner-circle {
+  width: 64px;
+  height: 64px;
+}
+
+/* Colors */
+.loading-spinner-primary {
+  color: var(--primary-color);
+}
+
+.loading-spinner-secondary {
+  color: var(--secondary-color);
+}
+
+.loading-spinner-white {
+  color: var(--white);
+}
+
+.loading-spinner-gray {
+  color: var(--gray-400);
+}
+
+.loading-spinner-success {
+  color: var(--success-color);
+}
+
+.loading-spinner-error {
+  color: var(--error-color);
+}
+
+.loading-spinner-warning {
+  color: var(--warning-color);
+}
+
+/* Gradient spinner */
+.loading-spinner-gradient .loading-spinner-circle {
+  border: 3px solid transparent;
+  border-top: 3px solid var(--primary-color);
+  background: conic-gradient(
+    var(--primary-color),
+    var(--secondary-color),
+    var(--accent-color),
+    var(--primary-color)
+  );
+  mask: radial-gradient(circle at center, transparent 50%, black 52%);
+  -webkit-mask: radial-gradient(circle at center, transparent 50%, black 52%);
+}
+
+/* Pulse animation */
+.loading-spinner-pulse .loading-spinner-circle {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Dots spinner */
+.loading-spinner-dots {
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.loading-spinner-dots .loading-spinner-circle {
+  width: 8px;
+  height: 8px;
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.loading-spinner-dots .loading-spinner-circle:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-spinner-dots .loading-spinner-circle:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* Text */
+.loading-text {
+  font-size: var(--text-sm);
+  color: var(--gray-600);
+  font-weight: var(--font-medium);
+  text-align: center;
+}
+
+/* Full screen overlay */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal-backdrop);
+}
+
+.loading-overlay-dark {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.loading-overlay-dark .loading-text {
+  color: var(--white);
+}
+
+/* Inline loading */
+.loading-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.loading-inline .loading-text {
+  margin: 0;
+}

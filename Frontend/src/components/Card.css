@@ -1,0 +1,178 @@
+.card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Padding variants */
+.card-padding-sm {
+  padding: var(--spacing-3);
+}
+
+.card-padding-md {
+  padding: var(--spacing-6);
+}
+
+.card-padding-lg {
+  padding: var(--spacing-8);
+}
+
+.card-padding-xl {
+  padding: var(--spacing-10);
+}
+
+.card-padding-none {
+  padding: 0;
+}
+
+/* Shadow variants */
+.card-shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.card-shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.card-shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+
+.card-shadow-none {
+  box-shadow: none;
+}
+
+/* Rounded variants */
+.card-rounded-sm {
+  border-radius: var(--radius-sm);
+}
+
+.card-rounded-md {
+  border-radius: var(--radius-md);
+}
+
+.card-rounded-lg {
+  border-radius: var(--radius-lg);
+}
+
+.card-rounded-xl {
+  border-radius: var(--radius-xl);
+}
+
+.card-rounded-2xl {
+  border-radius: var(--radius-2xl);
+}
+
+.card-rounded-none {
+  border-radius: 0;
+}
+
+/* Hover effects */
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gray-300);
+}
+
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:hover {
+  border-color: var(--primary-color);
+}
+
+/* Card sections */
+.card-header {
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--gray-200);
+  margin-bottom: var(--spacing-4);
+}
+
+.card-body {
+  flex: 1;
+}
+
+.card-footer {
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--gray-200);
+  margin-top: var(--spacing-4);
+}
+
+/* Card grid layouts */
+.card-grid {
+  display: grid;
+  gap: var(--spacing-6);
+}
+
+.card-grid-1 {
+  grid-template-columns: 1fr;
+}
+
+.card-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.card-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.card-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Responsive card grids */
+@media (max-width: 768px) {
+  .card-grid-2,
+  .card-grid-3,
+  .card-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .card-grid-3,
+  .card-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Card animations */
+.card-enter {
+  animation: slideInUp 0.4s ease-out;
+}
+
+.card-enter:nth-child(1) { animation-delay: 0s; }
+.card-enter:nth-child(2) { animation-delay: 0.1s; }
+.card-enter:nth-child(3) { animation-delay: 0.2s; }
+.card-enter:nth-child(4) { animation-delay: 0.3s; }
+.card-enter:nth-child(5) { animation-delay: 0.4s; }
+.card-enter:nth-child(6) { animation-delay: 0.5s; }
+
+/* Special card variants */
+.card-gradient {
+  background: linear-gradient(135deg, var(--gray-50), var(--white));
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-elevated {
+  box-shadow: var(--shadow-xl);
+  border: none;
+}
+
+.card-minimal {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
