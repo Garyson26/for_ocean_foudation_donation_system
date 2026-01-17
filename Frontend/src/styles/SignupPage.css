@@ -1,0 +1,124 @@
+/*!* SignupPage styles *!*/
+/*body {*/
+/*  margin: 0;*/
+/*  padding: 0;*/
+/*  min-height: 100vh;*/
+/*  background: #f8fafc;*/
+/*  display: flex;*/
+/*  align-items: center;*/
+/*  justify-content: center;*/
+/*}*/
+
+/*.signup-container {*/
+/*  width: 100%;*/
+/*  max-width: 400px;*/
+/*  margin: 2rem;*/
+/*  padding: 2.5rem;*/
+/*  border: none;*/
+/*  border-radius: 1rem;*/
+/*  background: #fff;*/
+/*  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);*/
+/*  position: relative;*/
+/*  overflow: hidden;*/
+/*  animation: slideIn 0.5s ease-out;*/
+/*}*/
+
+/*@keyframes slideIn {*/
+/*  from {*/
+/*    opacity: 0;*/
+/*    transform: translateY(20px);*/
+/*  }*/
+
+/*  to {*/
+/*    opacity: 1;*/
+/*    transform: translateY(0);*/
+/*  }*/
+/*}*/
+
+/*.signup-container::before {*/
+/*  content: '';*/
+/*  position: absolute;*/
+/*  top: 0;*/
+/*  left: 0;*/
+/*  right: 0;*/
+/*  height: 4px;*/
+/*  background: #10b981;*/
+/*}*/
+
+/*.signup-title {*/
+/*  font-size: 1.8rem;*/
+/*  font-weight: 700;*/
+/*  margin-bottom: 2rem;*/
+/*  color: #2d3748;*/
+/*  text-align: center;*/
+/*}*/
+
+/*.signup-form input {*/
+/*  width: 100%;*/
+/*  padding: 0.75rem 1rem;*/
+/*  margin-bottom: 1.5rem;*/
+/*  border: 2px solid #e2e8f0;*/
+/*  border-radius: 0.5rem;*/
+/*  font-size: 1rem;*/
+/*  transition: all 0.3s ease;*/
+/*  box-sizing: border-box;*/
+/*}*/
+
+/*.signup-form input:focus {*/
+/*  outline: none;*/
+/*  border-color: #38a169;*/
+/*  box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.1);*/
+/*}*/
+
+/*.signup-btn {*/
+/*  width: 100%;*/
+/*  padding: 0.875rem 1rem;*/
+/*  background: #10b981;*/
+/*  color: #fff;*/
+/*  border: none;*/
+/*  border-radius: 0.5rem;*/
+/*  font-weight: 600;*/
+/*  font-size: 1rem;*/
+/*  cursor: pointer;*/
+/*  transition: all 0.3s ease;*/
+/*  margin-top: 1rem;*/
+/*}*/
+
+/*.signup-btn:hover {*/
+/*  background: #059669;*/
+/*  transform: translateY(-1px);*/
+/*  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);*/
+/*}*/
+
+/*.signup-btn:active {*/
+/*  transform: translateY(0);*/
+/*}*/
+
+/*.signup-error {*/
+/*  color: #e53e3e;*/
+/*  margin-bottom: 1.5rem;*/
+/*  text-align: center;*/
+/*  padding: 0.5rem;*/
+/*  background: #fed7d7;*/
+/*  border-radius: 0.5rem;*/
+/*  border: 1px solid #feb2b2;*/
+/*}*/
+
+/*.signup-success {*/
+/*  color: #38a169;*/
+/*  margin-bottom: 1.5rem;*/
+/*  text-align: center;*/
+/*  padding: 0.5rem;*/
+/*  background: #c6f6d5;*/
+/*  border-radius: 0.5rem;*/
+/*  border: 1px solid #9ae6b4;*/
+/*}*/
+
+/*.signup-form input::placeholder {*/
+/*  color: #9ca3af;*/
+/*  font-size: 0.95rem;*/
+/*}*/
+
+/*.signup-form input:focus::placeholder {*/
+/*  color: #d1d5db;*/
+/*}*/
