@@ -113,24 +113,42 @@ function AdminCategories() {
   };
 
   const handleReorder = async (reorderedCategories) => {
+    console.log('✅ AdminCategories handleReorder called with:', reorderedCategories);
     try {
+      // Store original order for potential revert
+      const originalCategories = [...categories];
+      
+      // Create a completely new array with the new order
+      const newCategoriesOrder = reorderedCategories.map((item) => {
+        const category = categories.find(c => c._id === item.id);
+        return { 
+          ...category, 
+          displayOrder: item.displayOrder 
+        };
+      });
+      
+      // Force React to update by setting state with completely new array
+      setCategories([...newCategoriesOrder]);
+
+      // Save to backend
+      console.log('📡 Calling API with:', reorderedCategories);
       const response = await categoriesAPI.reorder(reorderedCategories);
+      console.log('📡 API response:', response);
+      
       if (response.ok) {
-        // Update local state with new order
-        const updatedCategories = [...categories];
-        reorderedCategories.forEach(({ id, displayOrder }) => {
-          const category = updatedCategories.find(c => c._id === id);
-          if (category) {
-            category.displayOrder = displayOrder;
-          }
-        });
-        updatedCategories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-        setCategories(updatedCategories);
         showToast("Categories reordered successfully!", "success");
       } else {
+        // Revert on error
+        setCategories(originalCategories);
         showToast(response.error || "Failed to reorder categories", "error");
       }
     } catch (error) {
+      console.error('❌ Reorder error:', error);
+      // Revert on error - reload from backend
+      const response = await categoriesAPI.getAll();
+      if (response.ok) {
+        setCategories(response.data);
+      }
       showToast("An error occurred while reordering categories", "error");
     }
   };
