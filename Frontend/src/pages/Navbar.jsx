@@ -133,18 +133,22 @@ function Navbar({ isAuthenticated, onLogout, userRole }) {
           </Link>
                 </>
             )}
-            <Link
-                to="/categories"
-                onClick={() => setIsDropdownOpen(false)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                    isActive('/categories')
-                        ? 'bg-[#05699e] text-white'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-[#05699e]'
-                }`}
-            >
-              Categories
-            </Link>
 
+               {isAuthenticated && (
+                <>
+              <Link
+                  to="/categories"
+                  onClick={() => setIsDropdownOpen(false)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                      isActive('/categories')
+                          ? 'bg-[#05699e] text-white'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-[#05699e]'
+                  }`}
+              >
+                Categories
+              </Link>
+            </>
+            )}
           {/* Auth Actions */}
           <div className="flex items-center space-x-2 ml-4">
             {!isAuthenticated && (
