@@ -18,6 +18,10 @@ const categorySchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  displayOrder: {
+    type: Number,
+    default: 0,
+  }
 }, {
   timestamps: true // Adds createdAt and updatedAt fields automatically
 });

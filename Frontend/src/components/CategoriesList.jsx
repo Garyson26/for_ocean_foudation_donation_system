@@ -1,6 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 
-function CategoriesList({ categories, onEdit, onDelete }) {
+function CategoriesList({ categories, onEdit, onDelete, onReorder }) {
+  const [draggedIndex, setDraggedIndex] = useState(null);
+
+  const handleDragStart = (e, index) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e, dropIndex) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === dropIndex) return;
+
+    const newCategories = [...categories];
+    const draggedItem = newCategories[draggedIndex];
+    
+    // Remove from old position
+    newCategories.splice(draggedIndex, 1);
+    // Insert at new position
+    newCategories.splice(dropIndex, 0, draggedItem);
+
+    // Update displayOrder for all categories
+    const reorderedCategories = newCategories.map((cat, index) => ({
+      id: cat._id,
+      displayOrder: index
+    }));
+
+    setDraggedIndex(null);
+    onReorder(reorderedCategories);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
       <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
@@ -10,6 +48,7 @@ function CategoriesList({ categories, onEdit, onDelete }) {
           </svg>
           Categories List ({categories.length})
         </h3>
+        <p className="text-sm text-gray-600 mt-1">Drag and drop to reorder categories</p>
       </div>
 
       <div className="p-6">
@@ -23,18 +62,39 @@ function CategoriesList({ categories, onEdit, onDelete }) {
           </div>
         ) : (
           <ul className="space-y-4">
-            {categories.map(cat => (
-              <li key={cat._id} className="bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 overflow-hidden">
+            {categories.map((cat, index) => (
+              <li 
+                key={cat._id} 
+                draggable
+                onDragStart={(e) => handleDragStart(e, index)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, index)}
+                onDragEnd={handleDragEnd}
+                className={`bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 overflow-hidden cursor-move ${
+                  draggedIndex === index ? 'opacity-50 scale-95' : ''
+                }`}
+              >
                 <div className="flex flex-col lg:flex-row justify-between items-start p-5">
-                  <div className="flex-1 w-full lg:w-auto">
-                    <div className="flex flex-wrap items-center gap-3 mb-3">
-                      <strong className="text-xl text-gray-900 font-semibold">{cat.name}</strong>
-                      {cat.donationAmount && (
-                        <span className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full border border-blue-600">
-                          ₹{cat.donationAmount}
-                        </span>
-                      )}
+                  {/* Drag Handle */}
+                  <div className="flex items-start gap-3 flex-1 w-full">
+                    <div className="flex-shrink-0 pt-1 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                      </svg>
                     </div>
+                    
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-3 mb-3">
+                        <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 text-sm font-bold rounded-full">
+                          {index + 1}
+                        </span>
+                        <strong className="text-xl text-gray-900 font-semibold">{cat.name}</strong>
+                        {cat.donationAmount && (
+                          <span className="inline-flex items-center bg-blue-100 text-blue-800 text-sm font-semibold px-3 py-1 rounded-full border border-blue-600">
+                            ₹{cat.donationAmount}
+                          </span>
+                        )}
+                      </div>
 
                     {cat.sortDescription && (
                       <p className="text-gray-600 text-sm mb-3 leading-relaxed">{cat.sortDescription}</p>
@@ -61,6 +121,7 @@ function CategoriesList({ categories, onEdit, onDelete }) {
                         </ul>
                       </div>
                     )}
+                    </div>
                   </div>
 
                   <div className="flex gap-2 mt-4 lg:mt-0 lg:ml-6 w-full lg:w-auto">

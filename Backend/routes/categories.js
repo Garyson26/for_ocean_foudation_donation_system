@@ -44,7 +44,7 @@ router.get("/", async (req, res) => {
 
       const total = await Category.countDocuments();
       const categories = await Category.find()
-        .sort({ createdAt: -1 })
+        .sort({ displayOrder: 1, createdAt: -1 })
         .skip(skip)
         .limit(limitNum);
 
@@ -59,7 +59,7 @@ router.get("/", async (req, res) => {
       });
     } else {
       // Return all categories without pagination (for dropdowns, etc.)
-      const categories = await Category.find().sort({ createdAt: -1 });
+      const categories = await Category.find().sort({ displayOrder: 1, createdAt: -1 });
       res.json(categories);
     }
   } catch (err) {
@@ -97,6 +97,28 @@ router.delete("/:id", async (req, res) => {
     const category = await Category.findByIdAndDelete(req.params.id);
     if (!category) return res.status(404).json({ error: "Category not found" });
     res.json({ message: "Category deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder categories
+router.put("/reorder", async (req, res) => {
+  try {
+    const { categories } = req.body; // Array of { id, displayOrder }
+
+    if (!categories || !Array.isArray(categories)) {
+      return res.status(400).json({ error: "Invalid categories data" });
+    }
+
+    // Update all categories with new display order
+    const updatePromises = categories.map(({ id, displayOrder }) =>
+      Category.findByIdAndUpdate(id, { displayOrder }, { new: true })
+    );
+
+    await Promise.all(updatePromises);
+
+    res.json({ message: "Categories reordered successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

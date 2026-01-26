@@ -112,6 +112,29 @@ function AdminCategories() {
     });
   };
 
+  const handleReorder = async (reorderedCategories) => {
+    try {
+      const response = await categoriesAPI.reorder(reorderedCategories);
+      if (response.ok) {
+        // Update local state with new order
+        const updatedCategories = [...categories];
+        reorderedCategories.forEach(({ id, displayOrder }) => {
+          const category = updatedCategories.find(c => c._id === id);
+          if (category) {
+            category.displayOrder = displayOrder;
+          }
+        });
+        updatedCategories.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+        setCategories(updatedCategories);
+        showToast("Categories reordered successfully!", "success");
+      } else {
+        showToast(response.error || "Failed to reorder categories", "error");
+      }
+    } catch (error) {
+      showToast("An error occurred while reordering categories", "error");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
       {/* Toast notifications */}
@@ -155,6 +178,7 @@ function AdminCategories() {
           categories={categories}
           onEdit={startEdit}
           onDelete={handleDelete}
+          onReorder={handleReorder}
         />
       </div>
     </div>

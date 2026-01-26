@@ -151,6 +151,13 @@ export const categoriesAPI = {
       method: "DELETE",
       auth: true,
     }),
+
+  reorder: (categories) =>
+    apiRequest("/categories/reorder", {
+      method: "PUT",
+      body: { categories },
+      auth: true,
+    }),
 };
 
 // Donations API calls
