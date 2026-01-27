@@ -2,48 +2,136 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Input from "../components/Input";
 import Button from "../components/Button";
+import Toast from "../components/Toast";
 import { validateLogin } from "../utils/validateForm";
 import { authAPI } from "../utils/api";
+import { useToast } from "../utils/useToast";
 
 function LoginPage({ onLogin }) {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const { toasts, showToast, hideToast } = useToast();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    if (error) setError(""); // Clear error on input change
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationError = validateLogin(form);
     if (validationError) {
-      setError(validationError);
+      showToast(validationError, "error");
       return;
     }
-    setError("");
     setLoading(true);
 
     try {
-      const { data, error, ok } = await authAPI.login(form);
+      const { data, error, ok, status } = await authAPI.login(form);
 
-      if (ok && data.token && data.user) {
+      if (ok && data.requiresOTP) {
+        // OTP sent successfully
+        setOtpSent(true);
+        showToast("OTP sent to your email!", "success");
+      } else if (status === 403 && data.needsSignupVerification) {
+        // User needs to verify signup first - show helpful message
+        showToast(error || "Please verify your email first. We've sent a new OTP.", "warning", 5000);
+        // Redirect to signup page after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/signup";
+        }, 2000);
+      } else if (ok && data.token && data.user) {
+        // Direct login (shouldn't happen with OTP system)
         localStorage.setItem("token", data.token);
         onLogin(data.user._id, data.user.role);
       } else {
-        setError(error || "Login failed");
+        showToast(error || "Login failed", "error");
       }
     } catch {
-      setError("An unexpected error occurred. Please try again.");
+      showToast("An unexpected error occurred. Please try again.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    if (!otp || otp.length !== 6) {
+      showToast("Please enter a valid 6-digit OTP", "error");
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/login/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, otp }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.token && data.user) {
+        localStorage.setItem("token", data.token);
+        showToast("Login successful!", "success");
+        onLogin(data.user._id, data.user.role);
+      } else {
+        showToast(data.error || "Invalid OTP. Please try again.", "error");
+      }
+    } catch {
+      showToast("An unexpected error occurred. Please try again.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setResendLoading(true);
+    
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/auth/login/resend-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showToast("OTP resent successfully!", "success");
+      } else {
+        showToast(data.error || "Failed to resend OTP", "error");
+      }
+    } catch {
+      showToast("Failed to resend OTP. Please try again.", "error");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  const handleBackToLogin = () => {
+    setOtpSent(false);
+    setOtp("");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      {/* Toast Messages */}
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          message={toast.message}
+          type={toast.type}
+          duration={toast.duration}
+          onClose={() => hideToast(toast.id)}
+        />
+      ))}
+
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
@@ -64,7 +152,9 @@ function LoginPage({ onLogin }) {
 
         {/* Login Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-gray-100">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          {!otpSent ? (
+            /* Email & Password Form */
+            <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Email Input */}
             <div>
               <Input
@@ -74,7 +164,6 @@ function LoginPage({ onLogin }) {
                 label="Email Address"
                 value={form.email}
                 onChange={handleChange}
-                error={error && error.includes("email") ? error : ""}
                 fullWidth
                 disabled={loading}
               />
@@ -121,17 +210,7 @@ function LoginPage({ onLogin }) {
                   )}
                 </button>
               </div>
-              {error && !error.includes("email") && (
-                <p className="mt-2 text-sm text-red-600">{error}</p>
-              )}
             </div>
-
-            {/* Error Message */}
-            {error && !error.includes("email") && !error.includes("password") && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
 
             {/* Submit Button */}
             <div className="pt-2">
@@ -160,6 +239,75 @@ function LoginPage({ onLogin }) {
               </p>
             </div>
           </form>
+          ) : (
+            /* OTP Verification Form */
+            <form className="space-y-6" onSubmit={handleOtpSubmit}>
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                  <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Verify Your Email
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  We've sent a 6-digit OTP to<br />
+                  <strong className="text-gray-900">{form.email}</strong>
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter OTP
+                </label>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "").slice(0, 6);
+                    setOtp(value);
+                  }}
+                  placeholder="000000"
+                  maxLength={6}
+                  className="w-full px-4 py-3 text-center text-2xl font-bold tracking-widest border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#05699e] focus:border-transparent outline-none transition-all duration-200"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  loading={loading}
+                  disabled={loading || otp.length !== 6}
+                >
+                  {loading ? "Verifying..." : "Verify OTP"}
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={handleBackToLogin}
+                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                  disabled={loading}
+                >
+                  ← Back to Login
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors duration-200 disabled:opacity-50"
+                  disabled={loading || resendLoading}
+                >
+                  {resendLoading ? "Sending..." : "Resend OTP"}
+                </button>
+              </div>
+            </form>
+          )}
         </div>
 
         {/* Footer Links */}

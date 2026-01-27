@@ -17,11 +17,16 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Category already exists" });
     }
 
+    // Get the highest displayOrder and add 1 for the new category
+    const lastCategory = await Category.findOne().sort({ displayOrder: -1 });
+    const nextDisplayOrder = lastCategory ? (lastCategory.displayOrder || 0) + 1 : 0;
+
     const category = new Category({
       name,
       sortDescription,
       donationAmount,
-      descriptions: descriptions || []
+      descriptions: descriptions || [],
+      displayOrder: nextDisplayOrder
     });
     await category.save();
     res.json({ message: "Category added successfully", category });
@@ -44,7 +49,7 @@ router.get("/", async (req, res) => {
 
       const total = await Category.countDocuments();
       const categories = await Category.find()
-        .sort({ createdAt: -1 })
+        .sort({ displayOrder: 1, createdAt: -1 })
         .skip(skip)
         .limit(limitNum);
 
@@ -59,9 +64,31 @@ router.get("/", async (req, res) => {
       });
     } else {
       // Return all categories without pagination (for dropdowns, etc.)
-      const categories = await Category.find().sort({ createdAt: -1 });
+      const categories = await Category.find().sort({ displayOrder: 1, createdAt: -1 });
       res.json(categories);
     }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Reorder categories - MUST be before /:id routes
+router.put("/reorder", async (req, res) => {
+  try {
+    const { categories } = req.body; // Array of { id, displayOrder }
+
+    if (!categories || !Array.isArray(categories)) {
+      return res.status(400).json({ error: "Invalid categories data" });
+    }
+
+    // Update all categories with new display order
+    const updatePromises = categories.map(({ id, displayOrder }) =>
+      Category.findByIdAndUpdate(id, { displayOrder }, { new: true })
+    );
+
+    await Promise.all(updatePromises);
+
+    res.json({ message: "Categories reordered successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -72,6 +72,44 @@ function CategoriesListPage() {
       });
   };
 
+  const handleReorder = async (reorderedCategories) => {
+    console.log('✅ CategoriesListPage handleReorder called');
+    try {
+      // Store original order for potential revert
+      const originalCategories = [...categories];
+      
+      // Create a completely new array with the new order
+      const newCategoriesOrder = reorderedCategories.map((item) => {
+        const category = categories.find(c => c._id === item.id);
+        return { 
+          ...category, 
+          displayOrder: item.displayOrder 
+        };
+      });
+      
+      // Update UI immediately
+      setCategories([...newCategoriesOrder]);
+
+      // Save to backend
+      console.log('📡 Calling API with:', reorderedCategories);
+      const response = await categoriesAPI.reorder(reorderedCategories);
+      console.log('📡 API response:', response);
+      
+      if (response.ok) {
+        showToast("Categories reordered successfully!", "success");
+      } else {
+        // Revert on error
+        setCategories(originalCategories);
+        showToast(response.error || "Failed to reorder categories", "error");
+      }
+    } catch (error) {
+      console.error('❌ Reorder error:', error);
+      // Reload from backend on error
+      loadCategories();
+      showToast("An error occurred while reordering categories", "error");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       {/* Toast notifications */}
@@ -129,6 +167,7 @@ function CategoriesListPage() {
               categories={categories}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onReorder={handleReorder}
             />
 
             {/* Pagination Controls */}

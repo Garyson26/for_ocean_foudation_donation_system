@@ -8,8 +8,11 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   address: { type: String },
   isActive: { type: Boolean, default: true },
+  isVerified: { type: Boolean, default: false },
   resetPasswordCode: { type: String },
-  resetPasswordExpires: { type: Date }
+  resetPasswordExpires: { type: Date },
+  loginOTP: { type: String },
+  loginOTPExpires: { type: Date }
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

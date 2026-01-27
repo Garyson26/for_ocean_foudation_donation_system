@@ -3,20 +3,29 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const PendingSignup = require("../models/PendingSignup");
 const authMiddleware = require("../middleware/authMiddleware");
 const { JWT_SECRET } = require("../config/jwt");
-const { sendVerificationEmail } = require("../config/email");
+const { sendVerificationEmail, sendLoginOTP, sendSignupOTP } = require("../config/email");
 
 // Helper function to generate random 6-digit code
 const generateVerificationCode = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// Signup
-
+// Signup - Step 1: Register user and send OTP
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role, adminKey } = req.body;
+
+    // Check if user already exists in main database (verified users)
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists with this email. Please login instead." });
+    }
+
+    // Check if there's a pending signup for this email
+    let pendingSignup = await PendingSignup.findOne({ email });
 
     // Prevent open admin creation: only accept role='admin' when adminKey matches
     let assignedRole = 'user';
@@ -28,28 +37,305 @@ router.post("/signup", async (req, res) => {
       }
     }
 
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date();
+    otpExpiry.setMinutes(otpExpiry.getMinutes() + 10); // 10 minutes expiry
+
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword, role: assignedRole });
-    await user.save();
-    res.json({ message: "User registered successfully", user: { _id: user._id, name: user.name, email: user.email, role: user.role } });
+
+    if (pendingSignup) {
+      // Update existing pending signup
+      pendingSignup.name = name;
+      pendingSignup.password = hashedPassword;
+      pendingSignup.role = assignedRole;
+      pendingSignup.signupOTP = otp;
+      pendingSignup.signupOTPExpires = otpExpiry;
+      await pendingSignup.save();
+
+      // Send OTP email
+      const emailResult = await sendSignupOTP(email, otp, name);
+      
+      if (!emailResult.success) {
+        return res.status(500).json({ error: "Failed to send verification email. Please try again." });
+      }
+
+      return res.json({ 
+        message: "OTP resent. Please check your email for verification.", 
+        email: email
+      });
+    }
+
+    // Create new pending signup
+    pendingSignup = new PendingSignup({ 
+      name, 
+      email, 
+      password: hashedPassword, 
+      role: assignedRole,
+      signupOTP: otp,
+      signupOTPExpires: otpExpiry
+    });
+    await pendingSignup.save();
+
+    // Send OTP email
+    const emailResult = await sendSignupOTP(email, otp, name);
+    
+    if (!emailResult.success) {
+      // Rollback: delete the pending signup if email fails
+      await PendingSignup.findByIdAndDelete(pendingSignup._id);
+      return res.status(500).json({ error: "Failed to send verification email. Please try again." });
+    }
+
+    res.json({ 
+      message: "Registration initiated. Please check your email for OTP verification.", 
+      email: email
+    });
   } catch (err) {
+    console.error("Signup error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Login
+// Signup - Step 2: Verify OTP and Create User
+router.post("/signup/verify-otp", async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required" });
+    }
+
+    // Find pending signup
+    const pendingSignup = await PendingSignup.findOne({ email });
+    if (!pendingSignup) {
+      return res.status(404).json({ error: "No pending signup found. Please signup again." });
+    }
+
+    // Check OTP
+    if (!pendingSignup.signupOTP || pendingSignup.signupOTP !== otp) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    // Check expiry
+    if (new Date() > pendingSignup.signupOTPExpires) {
+      return res.status(400).json({ error: "OTP has expired. Please request a new one." });
+    }
+
+    // OTP is valid - Create actual user in database
+    const newUser = new User({
+      name: pendingSignup.name,
+      email: pendingSignup.email,
+      password: pendingSignup.password,
+      role: pendingSignup.role,
+      isVerified: true // User is verified now
+    });
+    await newUser.save();
+
+    // Delete pending signup
+    await PendingSignup.findByIdAndDelete(pendingSignup._id);
+
+    // Generate token
+    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, JWT_SECRET, { expiresIn: "1h" });
+
+    res.json({ 
+      message: "Email verified successfully. Account created!", 
+      token, 
+      user: { _id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role } 
+    });
+  } catch (err) {
+    console.error("OTP verification error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Resend Signup OTP
+router.post("/signup/resend-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    // Find pending signup
+    const pendingSignup = await PendingSignup.findOne({ email });
+    if (!pendingSignup) {
+      return res.status(404).json({ error: "No pending signup found. Please signup again." });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date();
+    otpExpiry.setMinutes(otpExpiry.getMinutes() + 10);
+
+    pendingSignup.signupOTP = otp;
+    pendingSignup.signupOTPExpires = otpExpiry;
+    await pendingSignup.save();
+
+    // Send OTP email
+    const emailResult = await sendSignupOTP(email, otp, pendingSignup.name);
+    
+    if (!emailResult.success) {
+      return res.status(500).json({ error: "Failed to send verification email. Please try again." });
+    }
+
+    res.json({ message: "OTP resent successfully" });
+  } catch (err) {
+    console.error("Resend OTP error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Login - Step 1: Verify credentials and send OTP
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
+    // Check if there's a pending signup for this email (not yet verified)
+    const pendingSignup = await PendingSignup.findOne({ email });
+    if (pendingSignup) {
+      // Verify password to ensure it's the right user
+      const isMatch = await bcrypt.compare(password, pendingSignup.password);
+      if (isMatch) {
+        // Resend signup OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date();
+        otpExpiry.setMinutes(otpExpiry.getMinutes() + 10);
+
+        pendingSignup.signupOTP = otp;
+        pendingSignup.signupOTPExpires = otpExpiry;
+        await pendingSignup.save();
+
+        // Send OTP email
+        await sendSignupOTP(email, otp, pendingSignup.name);
+
+        return res.status(403).json({ 
+          error: "Your email is not verified yet. We've sent a new OTP to complete your signup.",
+          needsSignupVerification: true,
+          email: email
+        });
+      } else {
+        return res.status(400).json({ error: "Invalid credentials" });
+      }
+    }
+
+    // Check for verified user
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ error: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
-    res.json({ message: "Login success", token, user: { _id: user._id, name: user.name, email: user.email, role: user.role } });
+    // For backward compatibility: auto-verify existing users
+    // (users created before OTP system was implemented)
+    if (!user.isVerified) {
+      user.isVerified = true;
+      await user.save();
+    }
+
+    // Generate 6-digit login OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date();
+    otpExpiry.setMinutes(otpExpiry.getMinutes() + 10); // 10 minutes expiry
+
+    // Save OTP to user
+    user.loginOTP = otp;
+    user.loginOTPExpires = otpExpiry;
+    await user.save();
+
+    // Send OTP email
+    const emailResult = await sendLoginOTP(email, otp, user.name);
+    
+    if (!emailResult.success) {
+      return res.status(500).json({ error: "Failed to send OTP email. Please try again." });
+    }
+
+    res.json({ 
+      message: "OTP sent to your email", 
+      email: email,
+      requiresOTP: true 
+    });
   } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Login - Step 2: Verify OTP and complete login
+router.post("/login/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+  try {
+    if (!email || !otp) {
+      return res.status(400).json({ error: "Email and OTP are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check OTP
+    if (!user.loginOTP || user.loginOTP !== otp) {
+      return res.status(400).json({ error: "Invalid OTP" });
+    }
+
+    // Check expiry
+    if (new Date() > user.loginOTPExpires) {
+      return res.status(400).json({ error: "OTP has expired. Please login again." });
+    }
+
+    // Clear OTP
+    user.loginOTP = undefined;
+    user.loginOTPExpires = undefined;
+    await user.save();
+
+    // Generate token
+    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
+    
+    res.json({ 
+      message: "Login successful", 
+      token, 
+      user: { _id: user._id, name: user.name, email: user.email, role: user.role } 
+    });
+  } catch (err) {
+    console.error("OTP verification error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Resend Login OTP
+router.post("/login/resend-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Generate new OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date();
+    otpExpiry.setMinutes(otpExpiry.getMinutes() + 10);
+
+    user.loginOTP = otp;
+    user.loginOTPExpires = otpExpiry;
+    await user.save();
+
+    // Send OTP email
+    const emailResult = await sendLoginOTP(email, otp, user.name);
+    
+    if (!emailResult.success) {
+      return res.status(500).json({ error: "Failed to send OTP email. Please try again." });
+    }
+
+    res.json({ message: "OTP resent successfully" });
+  } catch (err) {
+    console.error("Resend OTP error:", err);
     res.status(500).json({ error: err.message });
   }
 });
