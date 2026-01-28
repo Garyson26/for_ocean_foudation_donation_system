@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const { initializeCleanupScheduler } = require("./services/dataCleanupService");
 
 // Load environment variables
 require("dotenv").config();
@@ -42,6 +43,10 @@ app.use("/cancel", paymentRoutes);
 
 // Connect Database
 connectDB();
+
+// Initialize automated data cleanup scheduler
+// This will automatically remove records older than 10 years
+initializeCleanupScheduler();
 
 // Server
 const PORT = process.env.PORT || 5000;

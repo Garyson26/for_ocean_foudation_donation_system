@@ -85,4 +85,10 @@ const donationSchema = new mongoose.Schema({
   timestamps: true // Adds createdAt and updatedAt fields automatically
 });
 
+// Indexes for better query performance
+donationSchema.index({ createdAt: 1 }); // For data cleanup queries
+donationSchema.index({ userId: 1 }); // For user-based queries
+donationSchema.index({ paymentStatus: 1 }); // For payment status filtering
+donationSchema.index({ category: 1 }); // For category-based queries
+
 module.exports = mongoose.model("Donation", donationSchema);

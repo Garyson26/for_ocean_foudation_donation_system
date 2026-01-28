@@ -5,6 +5,7 @@ const Donation = require("../models/Donation");
 const Category = require("../models/Category");
 const adminAuth = require("../middleware/adminAuth");
 const bcrypt = require("bcryptjs");
+const { triggerManualCleanup, cleanupOldDonations, cleanupInactiveUsers } = require("../services/dataCleanupService");
 
 // Protect all admin routes
 router.use(adminAuth);
@@ -236,6 +237,76 @@ router.delete("/users/:id", async (req, res) => {
 
     res.json({ message: "User deleted successfully" });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ==========================================
+// Data Cleanup Endpoints
+// ==========================================
+
+/**
+ * Trigger manual cleanup of old records
+ * Removes all data older than 10 years
+ */
+router.post("/cleanup/trigger", async (req, res) => {
+  try {
+    console.log('[Admin API] Manual cleanup triggered by admin');
+    
+    // Run cleanup in background and return immediately
+    triggerManualCleanup().catch(err => {
+      console.error('[Admin API] Background cleanup error:', err);
+    });
+
+    res.json({ 
+      message: "Data cleanup started in background. Check server logs for details.",
+      status: "processing"
+    });
+  } catch (err) {
+    console.error('[Admin API] Error triggering cleanup:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Get statistics on how many records would be deleted
+ * Without actually deleting them (dry run)
+ */
+router.get("/cleanup/preview", async (req, res) => {
+  try {
+    const tenYearsAgo = new Date();
+    tenYearsAgo.setFullYear(tenYearsAgo.getFullYear() - 10);
+
+    // Count old donations
+    const oldDonationsCount = await Donation.countDocuments({
+      createdAt: { $lt: tenYearsAgo }
+    });
+
+    // Count inactive users (no donations, older than 10 years)
+    const oldUsers = await User.find({
+      createdAt: { $lt: tenYearsAgo },
+      role: 'user'
+    });
+
+    let inactiveUsersCount = 0;
+    for (const user of oldUsers) {
+      const donationCount = await Donation.countDocuments({ userId: user._id });
+      if (donationCount === 0) {
+        inactiveUsersCount++;
+      }
+    }
+
+    res.json({
+      preview: {
+        donations: oldDonationsCount,
+        users: inactiveUsersCount,
+        cutoffDate: tenYearsAgo
+      },
+      message: `${oldDonationsCount} donation(s) and ${inactiveUsersCount} inactive user(s) would be deleted`,
+      note: "This is a preview only. No data has been deleted. Use POST /admin/cleanup/trigger to execute cleanup."
+    });
+  } catch (err) {
+    console.error('[Admin API] Error generating cleanup preview:', err);
     res.status(500).json({ error: err.message });
   }
 });

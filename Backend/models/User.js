@@ -15,4 +15,8 @@ const userSchema = new mongoose.Schema({
   loginOTPExpires: { type: Date }
 }, { timestamps: true });
 
+// Indexes for better query performance
+userSchema.index({ email: 1 }, { unique: true }); // Unique email index
+userSchema.index({ createdAt: 1, role: 1 }); // For data cleanup queries
+
 module.exports = mongoose.model("User", userSchema);

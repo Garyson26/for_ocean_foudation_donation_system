@@ -10,4 +10,8 @@ const pendingSignupSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now, expires: 86400 } // Auto-delete after 24 hours
 });
 
+// Indexes for better query performance
+pendingSignupSchema.index({ createdAt: 1 }); // For cleanup queries
+pendingSignupSchema.index({ email: 1 }); // For email lookups
+
 module.exports = mongoose.model("PendingSignup", pendingSignupSchema);
