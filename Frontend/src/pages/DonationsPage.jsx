@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateDonationReceipt, generateUserDonationReport } from "../utils/pdfGenerator";
+import { API_BASE_URL } from "../config/constants";
 
 function DonationsPage() {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ function DonationsPage() {
 
   // Fetch filter options from API on mount
   useEffect(() => {
-    fetch("http://localhost:5000/api/donations/filter-options")
+    fetch(`${API_BASE_URL}/api/donations/filter-options`)
       .then(res => res.json())
       .then(data => {
         setFilterOptions(data);
@@ -61,7 +62,7 @@ function DonationsPage() {
     params.append('limit', itemsPerPage);
 
     const queryString = params.toString();
-    const url = `http://localhost:5000/api/donations${queryString ? '?' + queryString : ''}`;
+    const url = `${API_BASE_URL}/api/donations${queryString ? '?' + queryString : ''}`;
 
     fetch(url)
       .then(res => res.json())

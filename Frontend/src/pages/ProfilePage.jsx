@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { validateProfile } from "../utils/validateForm";
 import Toast from "../components/Toast";
 import { useToast } from "../utils/useToast";
+import { API_BASE_URL } from "../config/constants";
 
 function ProfilePage() {
   const { toasts, showToast, hideToast } = useToast();
@@ -18,7 +19,7 @@ function ProfilePage() {
       return;
     }
 
-    fetch("http://localhost:5000/api/auth/me", {
+    fetch(`${API_BASE_URL}/api/auth/me`, {
       headers: { Authorization: "Bearer " + token }
     })
       .then(async res => {
@@ -65,7 +66,7 @@ function ProfilePage() {
       return;
     }
 
-    fetch("http://localhost:5000/api/users/profile", {
+    fetch(`${API_BASE_URL}/api/users/profile`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
