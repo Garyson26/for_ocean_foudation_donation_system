@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { authAPI } from "../utils/api";
 import Toast from "../components/Toast";
+import "../styles/LoginPage.css";
 
 function ForgotPassword() {
   const [step, setStep] = useState(1); // 1: Email, 2: Verify Code, 3: New Password
@@ -145,7 +146,7 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="h-screen box-mrg bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
       {/* Toast notifications */}
       {toasts.map((toast) => (
         <Toast

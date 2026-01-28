@@ -6,6 +6,7 @@ import Toast from "../components/Toast";
 import { validateLogin } from "../utils/validateForm";
 import { authAPI } from "../utils/api";
 import { useToast } from "../utils/useToast";
+import "../styles/LoginPage.css";
 
 function LoginPage({ onLogin }) {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -120,7 +121,7 @@ function LoginPage({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="h-screen box-mrg bg-gradient-to-br from-blue-50 via-white to-blue-50 flex items-center justify-center sm:px-6 lg:px-8">
       {/* Toast Messages */}
       {toasts.map((toast) => (
         <Toast
