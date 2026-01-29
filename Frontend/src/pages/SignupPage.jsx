@@ -321,19 +321,19 @@ function SignupPage({ onSignup }) {
         <div className="text-center">
           <p className="text-gray-500 text-sm">
             By creating an account, you agree to our{" "}
-            <a
-              href="#"
+            <Link
+              to="/terms"
               className="text-[#05699e] hover:text-[#044d73] font-medium transition-colors duration-200"
             >
               Terms of Service
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a
-              href="#"
+            <Link
+              to="/privacy"
               className="text-[#05699e] hover:text-[#044d73] font-medium transition-colors duration-200"
             >
               Privacy Policy
-            </a>
+            </Link>
           </p>
         </div>
       </div>

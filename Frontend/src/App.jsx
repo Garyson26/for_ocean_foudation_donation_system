@@ -25,6 +25,8 @@ import TailwindTest from "./pages/TailwindTest";
 import ButtonShowcase from "./pages/ButtonShowcase";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 
 // Utility function to decode JWT token
 const decodeToken = (token) => {
@@ -165,6 +167,8 @@ function AppContent() {
           <Route path="/donate" element={<DonationForm />} />
           <Route path="/login" element={<LoginWrapper />} />
           <Route path="/signup" element={<SignupWrapper />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
           <Route path="/my-donations" element={<PrivateRoute><MyDonations userId={userId} /></PrivateRoute>} />
           <Route path="/my-donations/:id" element={<PrivateRoute><DonationDetails /></PrivateRoute>} />

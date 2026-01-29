@@ -11,3 +11,46 @@
             height: calc(100vh - 109px);
     }
 
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .box-mrg {
+            height: calc(100vh - -220px);
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .box-mrg {
+            height: calc(100vh - 110px);
+            padding: 1rem;
+        }
+    }
+
+    @media (max-width: 430px) {
+        .box-mrg {
+            height: calc(100vh - 75px);
+            padding: 0.75rem;
+        }
+    }
+
+    @media (max-width: 390px) {
+        .box-mrg {
+            height: calc(100vh - 0px);
+            padding: 0.75rem;
+        }
+    }
+
+    @media (max-width: 375px) {
+        .box-mrg {
+            height: calc(100vh - -170px);
+            padding: 0.5rem;
+        }
+    }
+
+    /* Extra small devices */
+    @media (max-width: 360px) {
+        .box-mrg {
+            height: calc(100vh - 60px);
+            padding: 0.5rem;
+        }
+    }
+

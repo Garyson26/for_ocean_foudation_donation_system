@@ -1,0 +1,176 @@
+/* Terms of Service Styles */
+
+.terms-container {
+    min-height: calc(100vh - 109px);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 1rem;
+}
+
+.terms-content {
+    max-width: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    line-height: 1.8;
+    color: #333;
+}
+
+.terms-content h1 {
+    font-size: 2.5rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.terms-content h2 {
+    font-size: 1.5rem;
+    color: #764ba2;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.terms-content h3 {
+    font-size: 1.1rem;
+    color: #555;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.terms-content p {
+    margin-bottom: 1rem;
+    text-align: justify;
+    color: #666;
+    font-size: 1rem;
+}
+
+.terms-content ul {
+    margin: 1rem 0 1rem 2rem;
+    padding: 0;
+}
+
+.terms-content li {
+    margin-bottom: 0.8rem;
+    color: #555;
+    list-style-type: disc;
+}
+
+.terms-content section {
+    margin-bottom: 2rem;
+}
+
+.last-updated {
+    background-color: #f0f4ff;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+    border-left: 4px solid #667eea;
+}
+
+.last-updated p {
+    margin: 0;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.contact-info {
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #764ba2;
+    margin-top: 1rem;
+}
+
+.contact-info p {
+    margin: 0.5rem 0;
+    color: #555;
+}
+
+.contact-info strong {
+    color: #667eea;
+    font-weight: 700;
+}
+
+/* Responsive Design */
+
+@media (max-width: 768px) {
+    .terms-container {
+        padding: 1rem;
+    }
+
+    .terms-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .terms-content h1 {
+        font-size: 2rem;
+    }
+
+    .terms-content h2 {
+        font-size: 1.3rem;
+    }
+
+    .terms-content p {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .terms-container {
+        padding: 0.5rem;
+    }
+
+    .terms-content {
+        padding: 1.5rem 1rem;
+        border-radius: 8px;
+    }
+
+    .terms-content h1 {
+        font-size: 1.75rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .terms-content h2 {
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .terms-content h3 {
+        font-size: 1rem;
+    }
+
+    .terms-content p {
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .terms-content ul {
+        margin: 0.8rem 0 0.8rem 1.5rem;
+    }
+
+    .terms-content li {
+        margin-bottom: 0.6rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .terms-content {
+        padding: 1rem;
+    }
+
+    .terms-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .terms-content h2 {
+        font-size: 1rem;
+    }
+}

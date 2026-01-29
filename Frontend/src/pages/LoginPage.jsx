@@ -315,19 +315,19 @@ function LoginPage({ onLogin }) {
         <div className="text-center">
           <p className="text-gray-500 text-sm">
             By signing in, you agree to our{" "}
-            <a
-              href="#"
+            <Link
+              to="/terms"
               className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
             >
               Terms of Service
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a
-              href="#"
+            <Link
+              to="/privacy"
               className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
             >
               Privacy Policy
-            </a>
+            </Link>
           </p>
         </div>
       </div>
